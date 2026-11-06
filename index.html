@@ -1,697 +1,310 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  CheckCircle2, 
-  Circle, 
-  Clock, 
-  BookOpen, 
-  Calendar as CalendarIcon, 
-  RotateCcw, 
-  Plus, 
-  Minus, 
-  Bookmark, 
-  Volume2, 
-  Languages, 
-  HeartHandshake, 
-  Info,
-  ChevronRight,
-  ShieldCheck,
-  Check,
-  X
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noor — Исламское приложение</title>
+    <!-- Подключаем Tailwind CSS для красивого дизайна -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Иконки Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f7f2f5; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-[#f7f2f5] text-[#2d2130] flex justify-center min-h-screen">
 
-// Main Application Component
-export default function App() {
-  const [activeTab, setActiveTab] = useState('namaz');
-
-  // Persistence logic using localStorage
-  const [prayers, setPrayers] = useState(() => {
-    const saved = localStorage.getItem('app_prayers');
-    return saved ? JSON.parse(saved) : [
-      { id: 'fajr', name: 'Фаджр', time: '04:55', status: 'done', completedTime: '05:50' },
-      { id: 'dhuhr', name: 'Зухр', time: '12:20', status: 'done', completedTime: '12:30' },
-      { id: 'asr', name: 'Аср', time: '15:40', status: 'missed', completedTime: null },
-      { id: 'maghrib', name: 'Магриб', time: '17:38', status: 'upcoming', completedTime: null },
-      { id: 'isha', name: 'Иша', time: '19:02', status: 'upcoming', completedTime: null },
-    ];
-  });
-
-  const [qadaDays, setQadaDays] = useState(() => {
-    const saved = localStorage.getItem('app_qada');
-    return saved !== null ? parseInt(saved) : 4;
-  });
-
-  const [qadaLogs, setQadaLogs] = useState(() => {
-    const saved = localStorage.getItem('app_qada_logs');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [quranProgress, setQuranProgress] = useState(() => {
-    const saved = localStorage.getItem('app_quran_pages');
-    return saved !== null ? parseInt(saved) : 3;
-  });
-
-  const [dhikrCount, setDhikrCount] = useState(() => {
-    const saved = localStorage.getItem('app_dhikr_count');
-    return saved !== null ? parseInt(saved) : 0;
-  });
-
-  const [selectedDhikr, setSelectedDhikr] = useState('Субханаллах');
-
-  // Save states to localStorage
-  useEffect(() => {
-    localStorage.setItem('app_prayers', JSON.stringify(prayers));
-  }, [prayers]);
-
-  useEffect(() => {
-    localStorage.setItem('app_qada', qadaDays.toString());
-  }, [qadaDays]);
-
-  useEffect(() => {
-    localStorage.setItem('app_qada_logs', JSON.stringify(qadaLogs));
-  }, [qadaLogs]);
-
-  useEffect(() => {
-    localStorage.setItem('app_quran_pages', quranProgress.toString());
-  }, [quranProgress]);
-
-  useEffect(() => {
-    localStorage.setItem('app_dhikr_count', dhikrCount.toString());
-  }, [dhikrCount]);
-
-  // Handlers
-  const togglePrayer = (id) => {
-    setPrayers(prev => prev.map(p => {
-      if (p.id === id) {
-        const isDone = p.status === 'done';
-        return {
-          ...p,
-          status: isDone ? 'upcoming' : 'done',
-          completedTime: isDone ? null : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-      }
-      return p;
-    }));
-  };
-
-  return (
-    <div className="flex justify-center items-center min-h-screen bg-slate-900 font-sans p-0 sm:p-4">
-      {/* Mobile Frame Simulation */}
-      <div className="w-full max-w-md h-[100vh] sm:h-[844px] bg-[#f9f5f8] flex flex-col relative overflow-hidden sm:rounded-[40px] shadow-2xl border-0 sm:border-[8px] border-slate-800">
+    <!-- Мобильный контейнер -->
+    <div class="w-full max-w-md bg-[#fcf8fa] min-h-screen flex flex-col relative shadow-xl pb-24">
         
-        {/* Top Status Bar Placeholder */}
-        <div className="pt-3 px-6 flex justify-between items-center text-xs font-semibold text-slate-700 z-10 select-none">
-          <span>20:41</span>
-          <div className="w-20 h-4 bg-slate-900 rounded-full mx-auto hidden sm:block"></div>
-          <div className="flex items-center space-x-1.5">
-            <span className="text-[10px]">5G</span>
-            <div className="w-5 h-2.5 border border-slate-700 rounded-sm p-0.5 flex items-center">
-              <div className="w-full h-full bg-slate-700 rounded-xs"></div>
+        <!-- Верхняя строка состояния (муляж) -->
+        <div class="px-6 pt-4 pb-2 flex justify-between items-center text-xs text-purple-900 opacity-60">
+            <span>20:32</span>
+            <div class="flex gap-1.5 items-center">
+                <span>⚡ 4G</span>
+                <span>🔋 72%</span>
             </div>
-          </div>
         </div>
 
-        {/* Dynamic Screen Content */}
-        <div className="flex-1 overflow-y-auto px-5 pt-4 pb-24 scrollbar-none">
-          {activeTab === 'namaz' && (
-            <NamazScreen prayers={prayers} togglePrayer={togglePrayer} />
-          )}
-          {activeTab === 'journal' && (
-            <JournalScreen prayers={prayers} />
-          )}
-          {activeTab === 'quran' && (
-            <QuranScreen progress={quranProgress} setProgress={setQuranProgress} />
-          )}
-          {activeTab === 'calendar' && (
-            <CalendarScreen 
-              qadaDays={qadaDays} 
-              setQadaDays={setQadaDays}
-              qadaLogs={qadaLogs}
-              setQadaLogs={setQadaLogs}
-            />
-          )}
-          {activeTab === 'dhikr' && (
-            <DhikrScreen 
-              count={dhikrCount} 
-              setCount={setDhikrCount}
-              phrase={selectedDhikr}
-              setPhrase={setSelectedDhikr}
-            />
-          )}
+        <!-- ОСНОВНОЙ КОНТЕНТ ВКЛАДОК -->
+
+        <!-- 1. НАМАЗ -->
+        <div id="tab-namaz" class="tab-content active px-5 pt-2">
+            <div class="mb-4">
+                <span class="text-xs text-purple-900/60">четверг, 5 ноября • Алматы</span>
+                <h1 class="text-2xl font-bold text-[#2d2130]">Намаз</h1>
+            </div>
+
+            <!-- Карточка следующей молитвы -->
+            <div class="bg-[#4a2858] text-white p-5 rounded-3xl mb-5 shadow-md relative overflow-hidden">
+                <p class="text-xs uppercase tracking-wider opacity-80 mb-1">Следующая молитва</p>
+                <h2 class="text-4xl font-bold mb-2">04:55</h2>
+                <p class="text-lg font-semibold">Фаджр</p>
+                <p class="text-xs opacity-75 mt-1">Через 8 ч 14 мин</p>
+            </div>
+
+            <!-- Список намазов на сегодня -->
+            <h3 class="font-bold text-lg mb-3">Намазы сегодня</h3>
+            <div class="space-y-3" id="prayers-list">
+                <!-- Динамически заполняется через JS -->
+            </div>
         </div>
 
-        {/* Bottom Navigation Bar */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-purple-50 px-3 py-2 flex justify-around items-center z-20">
-          <NavButton 
-            active={activeTab === 'namaz'} 
-            onClick={() => setActiveTab('namaz')}
-            label="Намаз"
-            icon={<Clock className="w-5 h-5" />}
-          />
-          <NavButton 
-            active={activeTab === 'journal'} 
-            onClick={() => setActiveTab('journal')}
-            label="Дневник"
-            icon={<CheckCircle2 className="w-5 h-5" />}
-          />
-          <NavButton 
-            active={activeTab === 'quran'} 
-            onClick={() => setActiveTab('quran')}
-            label="Коран"
-            icon={<BookOpen className="w-5 h-5" />}
-          />
-          <NavButton 
-            active={activeTab === 'calendar'} 
-            onClick={() => setActiveTab('calendar')}
-            label="Календарь"
-            icon={<CalendarIcon className="w-5 h-5" />}
-          />
-          <NavButton 
-            active={activeTab === 'dhikr'} 
-            onClick={() => setActiveTab('dhikr')}
-            label="Зикр"
-            icon={<HeartHandshake className="w-5 h-5" />}
-          />
+        <!-- 2. ДНЕВНИК -->
+        <div id="tab-journal" class="tab-content px-5 pt-2">
+            <h1 class="text-2xl font-bold text-[#2d2130] mb-1">Дневник намазов</h1>
+            <p class="text-xs text-purple-900/60 mb-4">Чт, 5 ноября</p>
+
+            <!-- Дни недели мини-карточки -->
+            <div class="grid grid-cols-5 gap-2 mb-5" id="journal-days">
+                <!-- JS заполлит -->
+            </div>
+
+            <!-- Список намазов в дневнике -->
+            <div class="space-y-3 mb-5" id="journal-prayers-list"></div>
+
+            <!-- Статистика -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-[#4a2858] text-white p-4 rounded-2xl">
+                    <h4 class="text-2xl font-bold">7 дней</h4>
+                    <p class="text-xs opacity-80 mt-1">подряд без пропусков</p>
+                </div>
+                <div class="bg-[#dcfce7] text-[#166534] p-4 rounded-2xl">
+                    <h4 class="text-2xl font-bold">28 из 35</h4>
+                    <p class="text-xs opacity-80 mt-1">намазов за неделю</p>
+                </div>
+            </div>
         </div>
 
-      </div>
+        <!-- 3. КОРАН -->
+        <div id="tab-quran" class="tab-content px-5 pt-2">
+            <h1 class="text-2xl font-bold text-[#2d2130] mb-5">Коран</h1>
+
+            <!-- Карточка чтения -->
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-purple-100 mb-4">
+                <p class="text-xs text-purple-900/60 mb-1">Продолжить чтение</p>
+                <h3 class="text-xl font-bold text-[#2d2130]">Сура Аль-Бакара</h3>
+                <p class="text-xs text-purple-900/70 mb-4">Аят 142 из 286</p>
+                
+                <div class="w-full bg-purple-100 h-2 rounded-full mb-4 overflow-hidden">
+                    <div class="bg-[#4a2858] h-full w-[45%] rounded-full"></div>
+                </div>
+
+                <button class="w-full bg-[#4a2858] text-white py-3 rounded-xl font-medium text-sm shadow hover:bg-purple-900 transition">
+                    Читать дальше
+                </button>
+            </div>
+
+            <!-- Цель на сегодня -->
+            <div class="bg-[#dcfce7] p-4 rounded-2xl mb-4">
+                <h4 class="font-bold text-[#166534] text-sm">Цель на сегодня</h4>
+                <p class="text-xs text-[#166534] opacity-90 mt-0.5">Прочитано 3 из 5 страниц</p>
+            </div>
+
+            <div class="space-y-2">
+                <div class="bg-white p-4 rounded-2xl shadow-sm flex justify-between items-center border border-purple-50">
+                    <span class="font-medium text-sm">Закладки</span>
+                    <span class="text-sm font-bold text-purple-900">7</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm flex justify-between items-center border border-purple-50">
+                    <span class="font-medium text-sm">Переводы</span>
+                    <span class="text-sm text-purple-900/70">Русский</span>
+                </div>
+                <div class="bg-white p-4 rounded-2xl shadow-sm flex justify-between items-center border border-purple-50">
+                    <span class="font-medium text-sm">Аудио</span>
+                    <span class="text-sm text-purple-900/70">Чтец: выбрать</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. КАЛЕНДАРЬ -->
+        <div id="tab-calendar" class="tab-content px-5 pt-2">
+            <h1 class="text-2xl font-bold text-[#2d2130] mb-1">Женский календарь</h1>
+            <p class="text-xs text-purple-900/60 mb-4">Дни без намаза и поста, учёт кады</p>
+
+            <!-- Дни недели выбор -->
+            <div class="grid grid-cols-5 gap-2 mb-5">
+                <div class="bg-white py-3 rounded-2xl text-center shadow-sm"><span class="block text-[10px] text-gray-400">Пн</span><span class="font-bold text-sm">2</span></div>
+                <div class="bg-white py-3 rounded-2xl text-center shadow-sm"><span class="block text-[10px] text-gray-400">Вт</span><span class="font-bold text-sm">3</span></div>
+                <div class="bg-white py-3 rounded-2xl text-center shadow-sm"><span class="block text-[10px] text-gray-400">Ср</span><span class="font-bold text-sm">4</span></div>
+                <div class="bg-[#4a2858] text-white py-3 rounded-2xl text-center shadow-md"><span class="block text-[10px] opacity-75">Чт</span><span class="font-bold text-sm">5</span></div>
+                <div class="bg-white py-3 rounded-2xl text-center shadow-sm"><span class="block text-[10px] text-gray-400">Пт</span><span class="font-bold text-sm">6</span></div>
+            </div>
+
+            <!-- Карточка восполнения -->
+            <div class="bg-white p-5 rounded-3xl shadow-sm border border-purple-100 mb-4">
+                <p class="text-xs text-purple-900/60 mb-1">Осталось восполнить</p>
+                <h3 class="text-3xl font-bold text-[#2d2130] mb-4">4 дня поста</h3>
+                <button class="w-full bg-[#3f6249] text-white py-3 rounded-xl font-medium text-sm shadow hover:bg-green-800 transition">
+                    Отметить день
+                </button>
+            </div>
+
+            <div class="bg-purple-50 p-4 rounded-2xl text-xs text-purple-900/70 text-center">
+                Данные хранятся только на вашем устройстве.
+            </div>
+        </div>
+
+        <!-- 5. ЗИКР -->
+        <div id="tab-zikr" class="tab-content px-5 pt-2">
+            <h1 class="text-2xl font-bold text-[#2d2130] mb-4">Зикр и Тасбих</h1>
+            
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-purple-100 text-center mb-4">
+                <p class="text-xs text-purple-900/60 uppercase tracking-wider mb-2">Субханаллах</p>
+                <div id="zikr-counter" class="text-6xl font-bold text-[#4a2858] my-6">0</div>
+                <div class="flex gap-3">
+                    <button onclick="resetZikr()" class="flex-1 bg-gray-100 py-3 rounded-xl font-medium text-sm text-gray-600 hover:bg-gray-200 transition">Сброс</button>
+                    <button onclick="incrementZikr()" class="flex-2 bg-[#4a2858] text-white py-3 px-6 rounded-xl font-medium text-sm shadow hover:bg-purple-900 transition flex-grow">Считать +1</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="setZikrName('Субханаллах')" class="bg-white p-3 rounded-2xl text-sm font-medium border border-purple-100 shadow-sm">Субханаллах</button>
+                <button onclick="setZikrName('Альхамдулиллях')" class="bg-white p-3 rounded-2xl text-sm font-medium border border-purple-100 shadow-sm">Альхамдулиллях</button>
+                <button onclick="setZikrName('Аллаху Акбар')" class="bg-white p-3 rounded-2xl text-sm font-medium border border-purple-100 shadow-sm">Аллаху Акбар</button>
+                <button onclick="setZikrName('Астагфируллах')" class="bg-white p-3 rounded-2xl text-sm font-medium border border-purple-100 shadow-sm">Астагфируллах</button>
+            </div>
+        </div>
+
+        <!-- НИЖНЯЯ ПАНЕЛЬ НАВИГАЦИИ -->
+        <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-purple-100 py-3 px-4 flex justify-around items-center rounded-t-3xl shadow-lg">
+            <button onclick="switchTab('namaz')" id="nav-namaz" class="flex flex-col items-center text-[#4a2858] font-medium text-xs">
+                <i data-lucide="moon" class="w-5 h-5 mb-1"></i>
+                Намаз
+            </button>
+            <button onclick="switchTab('journal')" id="nav-journal" class="flex flex-col items-center text-gray-400 font-medium text-xs">
+                <i data-lucide="book-open" class="w-5 h-5 mb-1"></i>
+                Дневник
+            </button>
+            <button onclick="switchTab('quran')" id="nav-quran" class="flex flex-col items-center text-gray-400 font-medium text-xs">
+                <i data-lucide="book" class="w-5 h-5 mb-1"></i>
+                Коран
+            </button>
+            <button onclick="switchTab('calendar')" id="nav-calendar" class="flex flex-col items-center text-gray-400 font-medium text-xs">
+                <i data-lucide="calendar" class="w-5 h-5 mb-1"></i>
+                Календарь
+            </button>
+            <button onclick="switchTab('zikr')" id="nav-zikr" class="flex flex-col items-center text-gray-400 font-medium text-xs">
+                <i data-lucide="rotate-cw" class="w-5 h-5 mb-1"></i>
+                Зикр
+            </button>
+        </div>
+
     </div>
-  );
-}
 
-// Navigation Button Component
-function NavButton({ active, onClick, label, icon }) {
-  return (
-    <button 
-      onClick={onClick}
-      className={`flex flex-col items-center py-1 px-2 rounded-xl transition-all duration-200 ${
-        active ? 'text-[#3d1c52] font-bold scale-105' : 'text-slate-400 hover:text-slate-600 font-medium'
-      }`}
-    >
-      <div className={`p-1 rounded-xl ${active ? 'bg-purple-100 text-[#3d1c52]' : ''}`}>
-        {icon}
-      </div>
-      <span className="text-[11px] mt-0.5">{label}</span>
-    </button>
-  );
-}
+    <!-- Скрипты логики -->
+    <script>
+        // Инициализация иконок
+        lucide.createIcons();
 
-// 1. Namaz Screen Component
-function NamazScreen({ prayers, togglePrayer }) {
-  return (
-    <div className="space-y-4 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl font-bold text-[#2d123e]">Намаз</h1>
-        <p className="text-xs text-slate-500 font-medium">Четверг, 5 ноября • Алматы</p>
-      </div>
+        // Переключение вкладок
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.absolute.bottom-0 button').forEach(btn => {
+                btn.classList.remove('text-[#4a2858]');
+                btn.classList.add('text-gray-400');
+            });
 
-      {/* Main Card: Next Prayer */}
-      <div className="bg-[#3d1c52] text-white p-5 rounded-3xl shadow-lg shadow-purple-950/10 relative overflow-hidden">
-        <div className="relative z-10 space-y-1">
-          <span className="text-[11px] tracking-wider uppercase font-semibold text-purple-200 opacity-90">
-            Следующая молитва
-          </span>
-          <div className="text-4xl font-extrabold tracking-tight">04:55</div>
-          <div className="text-lg font-semibold pt-1 text-purple-100">Фаджр</div>
-          <div className="text-xs text-purple-200 pt-3 flex items-center gap-1 font-medium">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Через 8 ч 14 мин
-          </div>
-        </div>
-        {/* Crescent Decorative Background */}
-        <div className="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-purple-800/30 blur-sm pointer-events-none"></div>
-      </div>
+            document.getElementById('tab-' + tabName).classList.add('active');
+            const activeBtn = document.getElementById('nav-' + tabName);
+            activeBtn.classList.remove('text-gray-400');
+            activeBtn.classList.add('text-[#4a2858]');
+        }
 
-      {/* Today's Prayers Section */}
-      <div className="space-y-2.5 pt-2">
-        <h2 className="text-sm font-bold text-slate-700 px-1">Намазы сегодня</h2>
-        <div className="space-y-2">
-          {prayers.map((item) => {
-            const isDone = item.status === 'done';
-            const isMissed = item.status === 'missed';
+        // Данные намазов
+        let prayers = [
+            { id: 'fajr', name: 'Фаджр', time: '04:55', status: 'done', completedTime: '04:55' },
+            { id: 'dhuhr', name: 'Зухр', time: '11:36', status: 'done', completedTime: '11:36' },
+            { id: 'asr', name: 'Аср', time: '14:17', status: 'done', completedTime: '14:17' },
+            { id: 'maghrib', name: 'Магриб', time: '16:39', status: 'upcoming', completedTime: '' },
+            { id: 'isha', name: 'Иша', time: '18:11', status: 'upcoming', completedTime: '' }
+        ];
 
-            return (
-              <div 
-                key={item.id}
-                onClick={() => togglePrayer(item.id)}
-                className={`p-3.5 rounded-2xl bg-white border border-purple-50/60 shadow-xs flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] ${
-                  isDone ? 'bg-emerald-50/20' : ''
-                }`}
-              >
-                <div className="flex items-center space-x-3.5">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                    isDone 
-                      ? 'bg-[#52826d] text-white' 
-                      : isMissed 
-                      ? 'border-2 border-[#3d1c52] text-transparent' 
-                      : 'border-2 border-slate-200 text-transparent'
-                  }`}>
-                    <Check className="w-5 h-5 stroke-[3]" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">{item.name}</div>
-                    <div className="text-[11px] text-slate-400 font-medium">
-                      {isDone 
-                        ? `Выполнен в ${item.completedTime || item.time}` 
-                        : isMissed 
-                        ? 'Время вышло, отметьте' 
-                        : 'Начнётся в ' + item.time}
+        function renderPrayers() {
+            const list = document.getElementById('prayers-list');
+            const journalList = document.getElementById('journal-prayers-list');
+            
+            list.innerHTML = '';
+            journalList.innerHTML = '';
+
+            prayers.forEach(p => {
+                // Основной список
+                let isDone = p.status === 'done';
+                let cardClass = isDone ? 'bg-[#dcfce7] border-green-200 text-[#166534]' : 'bg-white border-purple-50';
+                let iconHtml = isDone ? '<div class="w-6 h-6 rounded-full bg-[#3f6249] text-white flex items-center justify-center text-xs">✓</div>' : '<div class="w-6 h-6 rounded-full border-2 border-gray-300"></div>';
+                
+                list.innerHTML += `
+                    <div onclick="togglePrayer('${p.id}')" class="${cardClass} p-4 rounded-2xl shadow-sm flex items-center justify-between border cursor-pointer transition active:scale-[0.99]">
+                        <div class="flex items-center gap-3">
+                            ${iconHtml}
+                            <div>
+                                <h4 class="font-bold text-sm">${p.name}</h4>
+                                <p class="text-xs opacity-70">${isDone ? 'Выполнен в ' + p.completedTime : 'Начнётся в ' + p.time}</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-medium opacity-60">${p.time}</span>
                     </div>
-                  </div>
-                </div>
-                <div className="text-xs font-semibold text-slate-400">
-                  {item.time}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
+                `;
 
-// 2. Journal Screen Component
-function JournalScreen({ prayers }) {
-  const days = [
-    { day: 'Пн', count: '5/5', full: true },
-    { day: 'Вт', count: '5/5', full: true },
-    { day: 'Ср', count: '4/5', full: false },
-    { day: 'Чт', count: '2/5', active: true },
-    { day: 'Пт', count: '0/5', full: false },
-  ];
+                // Список в дневнике
+                journalList.innerHTML += `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm flex items-center justify-between border border-purple-50">
+                        <div>
+                            <h4 class="font-bold text-sm">${p.name}</h4>
+                            <p class="text-xs text-purple-900/60">${isDone ? 'Выполнен в ' + p.completedTime : 'Не отмечен'}</p>
+                        </div>
+                        <span class="text-xs px-2.5 py-1 rounded-full ${isDone ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'}">${isDone ? 'Выполнен' : 'Пропущен'}</span>
+                    </div>
+                `;
+            });
 
-  return (
-    <div className="space-y-5 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl font-bold text-[#2d123e]">Дневник намазов</h1>
-        <p className="text-xs text-slate-500 font-medium">Чт, 5 ноября</p>
-      </div>
+            // Рендер дней в дневнике
+            const daysContainer = document.getElementById('journal-days');
+            daysContainer.innerHTML = `
+                <div class="bg-[#3f6249] text-white py-3 rounded-2xl text-center shadow-sm"><span class="block text-[10px] opacity-75">Пн</span><span class="font-bold text-xs">5/5</span></div>
+                <div class="bg-[#3f6249] text-white py-3 rounded-2xl text-center shadow-sm"><span class="block text-[10px] opacity-75">Вт</span><span class="font-bold text-xs">5/5</span></div>
+                <div class="bg-[#3f6249] text-white py-3 rounded-2xl text-center shadow-sm"><span class="block text-[10px] opacity-75">Ср</span><span class="font-bold text-xs">4/5</span></div>
+                <div class="bg-[#4a2858] text-white py-3 rounded-2xl text-center shadow-md"><span class="block text-[10px] opacity-75">Чт</span><span class="font-bold text-xs">2/5</span></div>
+                <div class="bg-purple-50 text-purple-900 py-3 rounded-2xl text-center shadow-sm"><span class="block text-[10px] opacity-50">Пт</span><span class="font-bold text-xs">0/5</span></div>
+            `;
+        }
 
-      {/* Days Weekly Counter */}
-      <div className="flex justify-between gap-1.5">
-        {days.map((item, idx) => (
-          <div 
-            key={idx}
-            className={`flex-1 py-2.5 rounded-2xl flex flex-col items-center justify-center space-y-1 transition-all ${
-              item.active 
-                ? 'bg-[#3d1c52] text-white shadow-md' 
-                : 'bg-white text-slate-600 border border-purple-50'
-            }`}
-          >
-            <span className="text-[11px] font-medium opacity-80">{item.day}</span>
-            <div className={`w-7 h-7 rounded-full text-[10px] font-bold flex items-center justify-center ${
-              item.active 
-                ? 'bg-purple-700/50 text-white' 
-                : item.full 
-                ? 'bg-[#52826d] text-white' 
-                : 'bg-emerald-100 text-emerald-800'
-            }`}>
-              {item.count}
-            </div>
-          </div>
-        ))}
-      </div>
+        function togglePrayer(id) {
+            prayers = prayers.map(p => {
+                if(p.id === id) {
+                    if(p.status === 'done') {
+                        p.status = 'upcoming';
+                        p.completedTime = '';
+                    } else {
+                        p.status = 'done';
+                        p.completedTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    }
+                }
+                return p;
+            });
+            renderPrayers();
+        }
 
-      {/* Today's Prayers List in Journal */}
-      <div className="space-y-2">
-        {prayers.map((item) => (
-          <div key={item.id} className="p-3.5 rounded-2xl bg-white border border-purple-50 shadow-xs flex items-center space-x-3">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
-              item.status === 'done' ? 'bg-[#52826d] text-white' : 'border-2 border-purple-900 text-transparent'
-            }`}>
-              <Check className="w-4 h-4 stroke-[3]" />
-            </div>
-            <div>
-              <div className="text-sm font-bold text-slate-800">{item.name}</div>
-              <div className="text-[11px] text-slate-400">
-                {item.status === 'done' ? `Выполнен в ${item.completedTime || item.time}` : 'Не отмечен'}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+        // Логика Зикра
+        let zikrCount = 0;
+        function incrementZikr() {
+            zikrCount++;
+            document.getElementById('zikr-counter').innerText = zikrCount;
+        }
+        function resetZikr() {
+            zikrCount = 0;
+            document.getElementById('zikr-counter').innerText = zikrCount;
+        }
+        function setZikrName(name) {
+            document.querySelector('#tab-zikr .uppercase').innerText = name;
+            resetZikr();
+        }
 
-      {/* Streak & Weekly Stats */}
-      <div className="grid grid-cols-2 gap-3 pt-2">
-        <div className="bg-[#3d1c52] text-white p-4 rounded-2xl flex flex-col justify-between space-y-3 shadow-md">
-          <div className="text-2xl font-extrabold leading-tight">
-            7 дней
-          </div>
-          <div className="text-[11px] text-purple-200 font-medium leading-snug">
-            подряд без пропусков
-          </div>
-        </div>
-
-        <div className="bg-[#e2f0ea] text-[#2c5243] p-4 rounded-2xl flex flex-col justify-between space-y-3">
-          <div className="text-2xl font-extrabold leading-tight">
-            28 из 35
-          </div>
-          <div className="text-[11px] text-[#3d6856] font-medium leading-snug">
-            намазов за неделю
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// 3. Quran Screen Component
-function QuranScreen({ progress, setProgress }) {
-  return (
-    <div className="space-y-4 animate-fadeIn">
-      <div>
-        <h1 className="text-2xl font-bold text-[#2d123e]">Коран</h1>
-      </div>
-
-      {/* Continue Reading Main Card */}
-      <div className="bg-white p-5 rounded-3xl border border-purple-50 shadow-xs space-y-4">
-        <div className="space-y-1">
-          <span className="text-[11px] font-medium text-slate-400">Продолжить чтение</span>
-          <h2 className="text-xl font-bold text-[#2d123e]">Сура Аль-Бакара</h2>
-          <p className="text-xs text-slate-500 font-medium">Аят 142 из 286</p>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="w-full bg-purple-50 h-2 rounded-full overflow-hidden">
-          <div className="bg-[#3d1c52] h-full w-[50%] rounded-full"></div>
-        </div>
-
-        <button className="w-full py-3.5 bg-[#3d1c52] hover:bg-[#2d123e] text-white font-semibold rounded-2xl text-sm transition-colors shadow-md">
-          Читать дальше
-        </button>
-      </div>
-
-      {/* Today's Reading Goal */}
-      <div className="bg-[#e2f0ea] p-4 rounded-2xl space-y-2">
-        <div className="text-sm font-bold text-[#2c5243]">Цель на сегодня</div>
-        <div className="flex justify-between items-center">
-          <span className="text-xs text-[#3d6856] font-medium">Прочитано {progress} из 5 страниц</span>
-          <div className="flex items-center space-x-2 bg-white/60 px-2 py-1 rounded-xl">
-            <button 
-              onClick={() => setProgress(Math.max(0, progress - 1))}
-              className="w-6 h-6 rounded-lg bg-white shadow-xs flex items-center justify-between justify-center text-emerald-800 active:scale-95"
-            >
-              <Minus className="w-3.5 h-3.5 mx-auto" />
-            </button>
-            <span className="text-xs font-bold text-emerald-900 w-4 text-center">{progress}</span>
-            <button 
-              onClick={() => setProgress(progress + 1)}
-              className="w-6 h-6 rounded-lg bg-white shadow-xs flex items-center justify-center text-emerald-800 active:scale-95"
-            >
-              <Plus className="w-3.5 h-3.5 mx-auto" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Menu Action List */}
-      <div className="space-y-2 pt-1">
-        <div className="p-3.5 bg-white rounded-2xl border border-purple-50 flex items-center justify-between cursor-pointer hover:bg-slate-50">
-          <div className="flex items-center space-x-3">
-            <Bookmark className="w-4 h-4 text-purple-700" />
-            <span className="text-sm font-semibold text-slate-700">Закладки</span>
-          </div>
-          <span className="text-xs font-bold text-slate-400">7</span>
-        </div>
-
-        <div className="p-3.5 bg-white rounded-2xl border border-purple-50 flex items-center justify-between cursor-pointer hover:bg-slate-50">
-          <div className="flex items-center space-x-3">
-            <Languages className="w-4 h-4 text-purple-700" />
-            <span className="text-sm font-semibold text-slate-700">Переводы</span>
-          </div>
-          <span className="text-xs font-medium text-slate-400">Русский</span>
-        </div>
-
-        <div className="p-3.5 bg-white rounded-2xl border border-purple-50 flex items-center justify-between cursor-pointer hover:bg-slate-50">
-          <div className="flex items-center space-x-3">
-            <Volume2 className="w-4 h-4 text-purple-700" />
-            <span className="text-sm font-semibold text-slate-700">Аудио</span>
-          </div>
-          <span className="text-xs font-medium text-slate-400">Чтец: выбрать</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// 4. Calendar Screen Component (Women's Calendar & Qada)
-function CalendarScreen({ qadaDays, setQadaDays, qadaLogs, setQadaLogs }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [logType, setLogType] = useState('cycle');
-  const [daysCount, setDaysCount] = useState(1);
-  const [note, setNote] = useState('');
-
-  const handleSaveLog = () => {
-    if (logType === 'qada') {
-      setQadaDays(prev => Math.max(0, prev - daysCount));
-    }
-    const newLog = {
-      id: Date.now(),
-      type: logType === 'cycle' ? 'День цикла' : 'Восполнение кады',
-      days: daysCount,
-      note: note || 'Без заметки',
-      date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })
-    };
-    setQadaLogs([newLog, ...qadaLogs]);
-    setIsModalOpen(false);
-    setNote('');
-  };
-
-  return (
-    <div className="space-y-4 animate-fadeIn relative">
-      <div>
-        <h1 className="text-2xl font-bold text-[#2d123e]">Женский календарь</h1>
-        <p className="text-xs text-slate-500 font-medium pt-0.5">Дни без намаза и поста, учёт кады</p>
-      </div>
-
-      {/* Week Days Row */}
-      <div className="flex justify-between gap-1.5">
-        {[
-          { day: 'Пн', num: '2' },
-          { day: 'Вт', num: '3' },
-          { day: 'Ср', num: '4' },
-          { day: 'Чт', num: '5', active: true },
-          { day: 'Пт', num: '6' },
-        ].map((item, idx) => (
-          <div 
-            key={idx}
-            className={`flex-1 py-3 rounded-2xl flex flex-col items-center justify-center space-y-1 ${
-              item.active ? 'bg-[#3d1c52] text-white shadow-md' : 'bg-white text-slate-700 border border-purple-50'
-            }`}
-          >
-            <span className="text-[11px] font-medium opacity-80">{item.day}</span>
-            <span className="text-sm font-extrabold">{item.num}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Qada Main Card */}
-      <div className="bg-white p-5 rounded-3xl border border-purple-50 shadow-xs space-y-4">
-        <div className="space-y-1">
-          <span className="text-xs text-slate-400 font-medium">Осталось восполнить</span>
-          <div className="text-3xl font-black text-[#2d123e]">
-            {qadaDays} {qadaDays === 1 ? 'день' : qadaDays > 1 && qadaDays < 5 ? 'дня' : 'дней'} поста
-          </div>
-        </div>
-
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="w-full py-3.5 bg-[#52826d] hover:bg-[#436c5a] text-white font-bold rounded-2xl text-sm transition-all shadow-md active:scale-[0.98]"
-        >
-          Отметить день
-        </button>
-      </div>
-
-      {/* Storage Info Badge */}
-      <div className="bg-purple-100/50 p-4 rounded-2xl flex items-start space-x-3 text-purple-900 border border-purple-100">
-        <ShieldCheck className="w-5 h-5 text-purple-700 shrink-0 mt-0.5" />
-        <p className="text-xs font-medium leading-relaxed">
-          Данные хранятся только на вашем устройстве в полной конфиденциальности.
-        </p>
-      </div>
-
-      {/* Logs History */}
-      {qadaLogs.length > 0 && (
-        <div className="space-y-2 pt-2">
-          <h3 className="text-xs font-bold text-slate-600 px-1">Недавние записи</h3>
-          <div className="space-y-2">
-            {qadaLogs.map((log) => (
-              <div key={log.id} className="p-3 bg-white rounded-2xl border border-purple-50 flex justify-between items-center">
-                <div>
-                  <div className="text-xs font-bold text-slate-800">{log.type} ({log.days} дн.)</div>
-                  <div className="text-[10px] text-slate-400">{log.note}</div>
-                </div>
-                <span className="text-[10px] font-semibold text-purple-700 bg-purple-50 px-2 py-1 rounded-lg">
-                  {log.date}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Interactive Modal Form (Отметка дня) */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-          <div className="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 space-y-4 animate-slideUp">
-            <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-lg font-bold text-[#2d123e]">Отметка дня</h3>
-              <button onClick={() => setIsModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Banner Date */}
-            <div className="bg-pink-100/60 p-3.5 rounded-2xl text-[#3d1c52] font-bold text-sm">
-              Четверг, 5 ноября
-            </div>
-
-            {/* Type Selector */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-600">Что отметить</label>
-              <div className="space-y-2">
-                <label 
-                  onClick={() => setLogType('cycle')}
-                  className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-all ${
-                    logType === 'cycle' ? 'border-purple-600 bg-purple-50/50' : 'border-slate-200'
-                  }`}
-                >
-                  <div>
-                    <div className="text-xs font-bold text-slate-800">День цикла</div>
-                    <div className="text-[10px] text-slate-400">Отметить начало или продолжение</div>
-                  </div>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                    logType === 'cycle' ? 'border-purple-700 bg-purple-700' : 'border-slate-300'
-                  }`}>
-                    {logType === 'cycle' && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
-                  </div>
-                </label>
-
-                <label 
-                  onClick={() => setLogType('qada')}
-                  className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-all ${
-                    logType === 'qada' ? 'border-purple-600 bg-purple-50/50' : 'border-slate-200'
-                  }`}
-                >
-                  <div>
-                    <div className="text-xs font-bold text-slate-800">Када</div>
-                    <div className="text-[10px] text-slate-400">Пропущенный пост / намаз для восполнения</div>
-                  </div>
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                    logType === 'qada' ? 'border-purple-700 bg-purple-700' : 'border-slate-300'
-                  }`}>
-                    {logType === 'qada' && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            {/* Days Counter */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600">Количество дней</label>
-              <div className="flex items-center justify-between bg-slate-50 p-2 rounded-2xl border border-slate-200">
-                <button 
-                  onClick={() => setDaysCount(Math.max(1, daysCount - 1))}
-                  className="w-10 h-10 rounded-xl bg-white shadow-xs font-bold text-lg text-slate-700 flex items-center justify-center active:scale-95"
-                >
-                  -
-                </button>
-                <span className="text-sm font-bold text-slate-800">{daysCount} дн.</span>
-                <button 
-                  onClick={() => setDaysCount(daysCount + 1)}
-                  className="w-10 h-10 rounded-xl bg-white shadow-xs font-bold text-lg text-slate-700 flex items-center justify-center active:scale-95"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            {/* Note Input */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-600">Заметка</label>
-              <input 
-                type="text" 
-                placeholder="Самочувствие или важная деталь"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                className="w-full p-3 text-xs bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:border-purple-600"
-              />
-            </div>
-
-            {/* Submit Button */}
-            <button 
-              onClick={handleSaveLog}
-              className="w-full py-3.5 bg-[#3d1c52] text-white font-bold rounded-2xl text-sm transition-all shadow-md active:scale-[0.98]"
-            >
-              Сохранить
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// 5. Dhikr Screen Component (Digital Tasbih)
-function DhikrScreen({ count, setCount, phrase, setPhrase }) {
-  const phrases = ['Субханаллах', 'Альхамдулиллях', 'Аллаху Акбар', 'Астагфируллах'];
-
-  const handleIncrement = () => {
-    setCount(prev => prev + 1);
-    // Trigger subtle vibration if available
-    if (navigator.vibrate) {
-      navigator.vibrate(30);
-    }
-  };
-
-  return (
-    <div className="space-y-5 animate-fadeIn flex flex-col items-center">
-      <div className="w-full text-left">
-        <h1 className="text-2xl font-bold text-[#2d123e]">Зикр</h1>
-        <p className="text-xs text-slate-500 font-medium">Электронный тасбих</p>
-      </div>
-
-      {/* Selectable Phrases */}
-      <div className="flex flex-wrap gap-2 justify-center w-full">
-        {phrases.map((item) => (
-          <button
-            key={item}
-            onClick={() => setPhrase(item)}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-              phrase === item 
-                ? 'bg-[#3d1c52] text-white shadow-sm' 
-                : 'bg-white text-slate-600 border border-purple-50'
-            }`}
-          >
-            {item}
-          </button>
-        ))}
-      </div>
-
-      {/* Main Digital Counter Display */}
-      <div className="w-full bg-white p-6 rounded-3xl border border-purple-50 shadow-xs flex flex-col items-center justify-center space-y-2">
-        <span className="text-xs font-bold uppercase tracking-wider text-purple-600">{phrase}</span>
-        <div className="text-6xl font-black text-[#2d123e] tracking-tight py-2">{count}</div>
-        <span className="text-xs font-medium text-slate-400">Цель: 33 / 100</span>
-      </div>
-
-      {/* Big Tap Button */}
-      <button 
-        onClick={handleIncrement}
-        className="w-44 h-44 rounded-full bg-gradient-to-br from-[#4a2560] to-[#2d123e] text-white font-extrabold text-xl shadow-xl shadow-purple-950/20 active:scale-95 transition-transform flex flex-col items-center justify-center border-4 border-purple-100"
-      >
-        <span>НАЖАТЬ</span>
-        <span className="text-[10px] font-normal text-purple-200 mt-1">Тасбих</span>
-      </button>
-
-      {/* Reset Button */}
-      <button 
-        onClick={() => setCount(0)}
-        className="flex items-center space-x-1.5 text-xs text-slate-400 hover:text-slate-600 pt-2 font-medium"
-      >
-        <RotateCcw className="w-3.5 h-3.5" />
-        <span>Сбросить счётчик</span>
-      </button>
-    </div>
-  );
-}
+        // Первичный запуск отрисовки
+        renderPrayers();
+    </script>
+</body>
+</html>
